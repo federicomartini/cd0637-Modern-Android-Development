@@ -1,8 +1,13 @@
 package com.udacity.zenflow
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import com.udacity.zenflow.ui.AppNavigation
 import com.udacity.zenflow.ui.theme.ZenFlowTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -10,19 +15,30 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    // TODO: You might need a launcher to request permissions (Android 13+ Notifications).
-    // private val requestPermissionLauncher = ...
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // TODO: Request the POST_NOTIFICATIONS permission if the device is running Android 13 (Tiramisu) or higher.
-        // This is required for your ReminderWorker to actually show anything.
+        requestNotificationPermission()
 
         setContent {
             ZenFlowTheme {
-                // The main entry point to your Compose UI
                 AppNavigation()
+            }
+        }
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
     }
