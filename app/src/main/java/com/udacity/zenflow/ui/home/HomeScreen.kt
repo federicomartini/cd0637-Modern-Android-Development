@@ -1,34 +1,107 @@
 package com.udacity.zenflow.ui.home
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.udacity.zenflow.R
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun HomeScreen(
     onNavigateToBreathing: () -> Unit,
     onNavigateToJournal: () -> Unit
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    val greeting = remember { greetingForCurrentTime() }
+    val formattedDate = remember {
+        SimpleDateFormat("EEEE, MMMM d, yyyy", Locale.getDefault()).format(Date())
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        // TODO: Build your Dashboard!
-        // This is the first thing users see. Make it welcoming.
+        Text(
+            text = greeting,
+            style = MaterialTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center
+        )
 
-        // Requirements:
-        // 1. Display a Greeting (e.g., "Welcome Back").
-        //    (Challenge: Can you make it say "Good Morning" / "Good Evening" based on time?)
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // 2. Display the current Date formatted nicely.
+        Text(
+            text = formattedDate,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
 
-        // 3. Create a primary "Call to Action" area (like a Card or Banner).
-        //    Inside this area, provide buttons/links to:
-        //      - Start a Breathing Session (calls onNavigateToBreathing)
-        //      - Write in the Journal (calls onNavigateToJournal)
+        Spacer(modifier = Modifier.height(32.dp))
 
-        // Feel free to use Column, Row, LazyColumn, or Scaffolds to structure this screen.
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.your_daily_mindful_moment),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                )
+
+                Button(
+                    onClick = onNavigateToBreathing,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(R.string.start_breathing_session))
+                }
+
+                OutlinedButton(
+                    onClick = onNavigateToJournal,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(R.string.gratitude_journal))
+                }
+            }
+        }
+    }
+}
+
+private fun greetingForCurrentTime(): String {
+    return when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
+        in 5..11 -> "Good Morning"
+        in 12..16 -> "Good Afternoon"
+        in 17..20 -> "Good Evening"
+        else -> "Welcome Back"
     }
 }
