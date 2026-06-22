@@ -1,10 +1,17 @@
 package com.udacity.zenflow.ui.journal
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import com.udacity.zenflow.data.JournalEntry
+import com.udacity.zenflow.ui.theme.ZenFlowTheme
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
-//Testing JournalScreen, feel free to add more tests
 class JournalScreenTest {
 
     @get:Rule
@@ -12,31 +19,50 @@ class JournalScreenTest {
 
     @Test
     fun journalScreen_displaysStaticContent() {
-        // TODO: Verify the static UI elements (like the Save button).
-        // 1. Set the content using 'JournalScreenContent' with an empty list.
-        // 2. Assert that the "Save" button (or "Add Entry" button) is displayed.
+        composeTestRule.setContent {
+            ZenFlowTheme {
+                JournalScreenContent(
+                    entries = emptyList(),
+                    onAddEntry = {}
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("Save").assertIsDisplayed()
     }
 
     @Test
     fun journalScreen_inputUpdatesAndCallbackTriggered() {
-        // TODO: Verify input interaction.
-        // 1. Create a variable to capture the output: 'var addedEntry = ""'.
-        // 2. Set the content, passing a lambda { addedEntry = it } for 'onAddEntry'.
+        var addedEntry = ""
 
-        // 3. Find the text input field.
-        //    *CRITICAL HINT*: In your JournalScreen.kt, did you add 'Modifier.testTag("journal_input")'?
-        //    Use 'onNodeWithTag("journal_input")' to find it.
+        composeTestRule.setContent {
+            ZenFlowTheme {
+                JournalScreenContent(
+                    entries = emptyList(),
+                    onAddEntry = { addedEntry = it }
+                )
+            }
+        }
 
-        // 4. Perform text input: .performTextInput("My Gratitude").
-        // 5. Find and Click the Save button.
-        // 6. Assert that 'addedEntry' matches "My Gratitude".
+        composeTestRule.onNodeWithTag("journal_input").performTextInput("Test Entry")
+        composeTestRule.onNodeWithText("Save").performClick()
+
+        assertEquals("Test Entry", addedEntry)
     }
 
     @Test
     fun journalScreen_displaysEntries() {
-        // TODO: Verify List rendering.
-        // 1. Create a list containing one JournalEntry (e.g., content = "Coffee").
-        // 2. Set the content passing this list.
-        // 3. Assert that the text "Coffee" exists and is displayed on the screen.
+        val entries = listOf(JournalEntry(id = 1, content = "Coffee"))
+
+        composeTestRule.setContent {
+            ZenFlowTheme {
+                JournalScreenContent(
+                    entries = entries,
+                    onAddEntry = {}
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("Coffee").assertIsDisplayed()
     }
 }
