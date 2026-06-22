@@ -2,9 +2,14 @@ package com.udacity.zenflow
 
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
-import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
 import androidx.work.Configuration
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.udacity.zenflow.worker.ReminderWorker
+import dagger.hilt.android.HiltAndroidApp
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 @HiltAndroidApp
 class ZenFlowApp : Application(), Configuration.Provider {
@@ -23,12 +28,19 @@ class ZenFlowApp : Application(), Configuration.Provider {
     }
 
     private fun setupRecurringWork() {
-        // TODO: Schedule your ReminderWorker here.
-        // Requirements:
-        // 1. Create a PeriodicWorkRequest to run once every 24 hours.
-        // 2. (Optional) Add Constraints: Require the device to not be low on battery.
-        // 3. Enqueue the work using WorkManager.
-        //    Hint: Use 'enqueueUniquePeriodicWork' with ExistingPeriodicWorkPolicy.KEEP
-        //    to avoid scheduling duplicate jobs every time the app opens.
+        val workRequest = PeriodicWorkRequestBuilder<ReminderWorker>(
+            24,
+            TimeUnit.HOURS
+        ).build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            REMINDER_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
+    }
+
+    companion object {
+        private const val REMINDER_WORK_NAME = "reminder_worker"
     }
 }
