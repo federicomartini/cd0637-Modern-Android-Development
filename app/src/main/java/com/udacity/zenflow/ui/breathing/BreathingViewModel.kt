@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -47,7 +48,14 @@ class BreathingViewModel @Inject constructor() : ViewModel() {
             phaseDuration = durationSeconds * 1000L,
             secondsLeft = durationSeconds
         )
-        delay(durationSeconds * 1000L)
+        repeat(durationSeconds) { elapsed ->
+            delay(1_000)
+            if (!coroutineContext.isActive || !_uiState.value.isSessionActive) return
+            val remaining = durationSeconds - elapsed - 1
+            if (remaining > 0) {
+                _uiState.value = _uiState.value.copy(secondsLeft = remaining)
+            }
+        }
     }
 
     private fun stopSession() {

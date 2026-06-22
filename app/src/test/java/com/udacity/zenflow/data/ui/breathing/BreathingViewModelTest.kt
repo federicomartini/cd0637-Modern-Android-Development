@@ -51,6 +51,26 @@ class BreathingViewModelTest {
     }
 
     @Test
+    fun sessionFlow_countdownDecrementsEachSecond() {
+        val viewModel = BreathingViewModel()
+
+        viewModel.toggleSession()
+        testDispatcher.scheduler.runCurrent()
+        assertEquals(4, viewModel.uiState.value.secondsLeft)
+
+        testDispatcher.scheduler.advanceTimeBy(1_000)
+        testDispatcher.scheduler.runCurrent()
+        assertEquals(3, viewModel.uiState.value.secondsLeft)
+
+        testDispatcher.scheduler.advanceTimeBy(1_000)
+        testDispatcher.scheduler.runCurrent()
+        assertEquals(2, viewModel.uiState.value.secondsLeft)
+
+        viewModel.toggleSession()
+        testDispatcher.scheduler.runCurrent()
+    }
+
+    @Test
     fun sessionFlow_progressesThroughPhases() {
         val viewModel = BreathingViewModel()
 
