@@ -1,9 +1,14 @@
 package com.udacity.zenflow.worker
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.os.Build
+import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.udacity.zenflow.R
 import com.udacity.zenflow.data.JournalRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -16,28 +21,44 @@ class ReminderWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
-        // TODO: Implement the Background Work.
-        // 1. Check if the user has already journaled today (use journalRepository.hasEntryForToday()).
-        // 2. If they have NOT journaled, call showNotification().
-        // 3. Handle exceptions and return Result.success() or Result.retry().
-
-        return Result.success()
+        return try {
+            if (!journalRepository.hasEntryForToday()) {
+                showNotification()
+            }
+            Result.success()
+        } catch (e: Exception) {
+            Result.retry()
+        }
     }
 
     private fun showNotification() {
-        // TODO: Create and display a Notification.
-        // Requirements:
-        // 1. Get reference to NotificationManager.
-        // 2. Create a NotificationChannel (Required for Android O+).
-        //    - ID: "reflection_channel"
-        //    - Name: "Reflection Reminders"
-        //    - Importance: Default
-        // 3. Build the Notification using NotificationCompat.Builder.
-        //    - Set Title: "Time to Reflect"
-        //    - Set Text: "You haven't journaled today..."
-        //    - Set SmallIcon.
-        // 4. Show the notification using .notify().
+        val notificationManager =
+            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // (Bonus): Add a PendingIntent so clicking the notification opens the app.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(NOTIFICATION_TITLE)
+            .setContentText(NOTIFICATION_TEXT)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    companion object {
+        private const val CHANNEL_ID = "reflection_channel"
+        private const val CHANNEL_NAME = "Reflection Reminders"
+        private const val NOTIFICATION_TITLE = "Time to Reflect"
+        private const val NOTIFICATION_TEXT = "You haven't journaled today..."
+        private const val NOTIFICATION_ID = 1001
     }
 }
