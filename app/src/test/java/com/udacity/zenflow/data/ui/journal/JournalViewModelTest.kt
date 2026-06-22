@@ -1,14 +1,22 @@
 package com.udacity.zenflow.ui.journal
 
+import com.udacity.zenflow.data.JournalEntry
 import com.udacity.zenflow.data.JournalRepository
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
@@ -30,25 +38,43 @@ class JournalViewModelTest {
 
     @Test
     fun entries_updatesWhenRepositoryEmits() = runTest {
-        // TODO: Verify that the ViewModel correctly exposes data from the Repository.
-        // 1. Mock the repository to return a Flow of entries (using flowOf(...)).
-        // 2. Create the ViewModel.
-        // 3. Collect the viewModel.entries state (you might need backgroundScope.launch).
-        // 4. Assert that the ViewModel's value matches the mock data.
+        val expectedEntries = listOf(
+            JournalEntry(id = 1, content = "Coffee"),
+            JournalEntry(id = 2, content = "Sunshine")
+        )
+        every { journalRepository.getAllEntries() } returns flowOf(expectedEntries)
+
+        val viewModel = JournalViewModel(journalRepository)
+
+        val collectJob = backgroundScope.launch {
+            viewModel.entries.collect { }
+        }
+        runCurrent()
+
+        assertEquals(expectedEntries, viewModel.entries.value)
+        collectJob.cancel()
     }
 
     @Test
     fun addEntry_callsRepository() = runTest {
-        // TODO: Verify that adding an entry calls the repository.
-        // 1. Mock the repository's addEntry method (coEvery { ... }).
-        // 2. Call viewModel.addEntry("Some Content").
-        // 3. Verify that journalRepository.addEntry("Some Content") was called (coVerify { ... }).
+        every { journalRepository.getAllEntries() } returns flowOf(emptyList())
+        coEvery { journalRepository.addEntry(any()) } returns Unit
+
+        val viewModel = JournalViewModel(journalRepository)
+        viewModel.addEntry("Some Content")
+        runCurrent()
+
+        coVerify { journalRepository.addEntry("Some Content") }
     }
 
     @Test
     fun addEntry_ignoresBlankContent() = runTest {
-        // TODO: Verify validation logic.
-        // 1. Call viewModel.addEntry("   ") (blank string).
-        // 2. Verify that journalRepository.addEntry was NEVER called.
+        every { journalRepository.getAllEntries() } returns flowOf(emptyList())
+
+        val viewModel = JournalViewModel(journalRepository)
+        viewModel.addEntry("   ")
+        runCurrent()
+
+        coVerify(exactly = 0) { journalRepository.addEntry(any()) }
     }
 }

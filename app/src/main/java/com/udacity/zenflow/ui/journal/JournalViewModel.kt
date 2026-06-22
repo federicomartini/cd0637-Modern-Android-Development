@@ -16,15 +16,17 @@ class JournalViewModel @Inject constructor(
     private val journalRepository: JournalRepository
 ) : ViewModel() {
 
-    // TODO: Expose the stream of entries to the UI.
-    // The Repository returns a Flow<List<JournalEntry>>.
-    // You should convert this to a StateFlow so the UI has a safe initial state.
-    // Hint: Use .stateIn() with SharingStarted.WhileSubscribed(5000).
-    val entries: StateFlow<List<JournalEntry>> = TODO("Not yet implemented")
+    val entries: StateFlow<List<JournalEntry>> = journalRepository.getAllEntries()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
 
     fun addEntry(content: String) {
-        // TODO: Validate and Save.
-        // 1. check if content is not blank.
-        // 2. Launch a coroutine to call the repository.
+        if (content.isBlank()) return
+        viewModelScope.launch {
+            journalRepository.addEntry(content)
+        }
     }
 }
