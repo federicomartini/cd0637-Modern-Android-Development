@@ -4,9 +4,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -27,30 +31,47 @@ class BreathingViewModelTest {
 
     @Test
     fun initialState_isIdle() {
-        // TODO: Verify the default state of the ViewModel.
-        // 1. Instantiate the ViewModel.
-        // 2. Assert that the initial phase is IDLE.
-        // 3. Assert that the session is not active.
+        val viewModel = BreathingViewModel()
+
+        assertEquals(BreathingPhase.IDLE, viewModel.uiState.value.phase)
+        assertFalse(viewModel.uiState.value.isSessionActive)
     }
 
     @Test
     fun toggleSession_startsAndStopsSession() = runTest {
-        // TODO: Test the toggle logic.
-        // 1. Call viewModel.toggleSession().
-        // 2. Run pending coroutines (testDispatcher.scheduler.runCurrent()).
-        // 3. Assert that isSessionActive is true.
-        // 4. Call toggleSession() again and assert it becomes false.
+        val viewModel = BreathingViewModel()
+
+        viewModel.toggleSession()
+        runCurrent()
+        assertTrue(viewModel.uiState.value.isSessionActive)
+
+        viewModel.toggleSession()
+        runCurrent()
+        assertFalse(viewModel.uiState.value.isSessionActive)
     }
 
     @Test
-    fun sessionFlow_progressesThroughPhases() = runTest {
-        // TODO: (Challenge) Verify the 4-7-8 Breathing Cycle.
-        // Hint: Use testDispatcher.scheduler.advanceTimeBy(milliseconds) to "fast forward" time.
+    fun sessionFlow_progressesThroughPhases() {
+        val viewModel = BreathingViewModel()
 
-        // 1. Start the session.
-        // 2. Assert Phase is INHALE.
-        // 3. Advance time by 4 seconds -> Assert Phase is HOLD.
-        // 4. Advance time by 7 seconds -> Assert Phase is EXHALE.
-        // 5. Advance time by 8 seconds -> Assert Phase loops back to INHALE.
+        viewModel.toggleSession()
+        testDispatcher.scheduler.runCurrent()
+        assertEquals(BreathingPhase.INHALE, viewModel.uiState.value.phase)
+
+        testDispatcher.scheduler.advanceTimeBy(4_000)
+        testDispatcher.scheduler.runCurrent()
+        assertEquals(BreathingPhase.HOLD, viewModel.uiState.value.phase)
+
+        testDispatcher.scheduler.advanceTimeBy(7_000)
+        testDispatcher.scheduler.runCurrent()
+        assertEquals(BreathingPhase.EXHALE, viewModel.uiState.value.phase)
+
+        testDispatcher.scheduler.advanceTimeBy(8_000)
+        testDispatcher.scheduler.runCurrent()
+        assertEquals(BreathingPhase.INHALE, viewModel.uiState.value.phase)
+
+        viewModel.toggleSession()
+        testDispatcher.scheduler.runCurrent()
+        assertFalse(viewModel.uiState.value.isSessionActive)
     }
 }
