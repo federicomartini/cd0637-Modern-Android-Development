@@ -2,6 +2,8 @@ package com.udacity.zenflow.ui.breathing
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -73,49 +75,51 @@ fun BreathingScreenContent(
         BreathingPhase.IDLE -> MaterialTheme.colorScheme.primaryContainer
     }
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(24.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(160.dp)
-                    .scale(scale)
-                    .alpha(alpha)
-                    .background(color = circleColor, shape = CircleShape)
-            )
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(32.dp))
+        Box(
+            modifier = Modifier
+                .size(160.dp)
+                .scale(scale)
+                .alpha(alpha)
+                .background(color = circleColor, shape = CircleShape)
+        )
 
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            text = uiState.phase.instruction,
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        if (uiState.isSessionActive && uiState.secondsLeft > 0) {
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = uiState.phase.instruction,
-                style = MaterialTheme.typography.headlineMedium
+                text = uiState.secondsLeft.toString(),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-            if (uiState.isSessionActive && uiState.secondsLeft > 0) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = uiState.secondsLeft.toString(),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Button(onClick = onToggleSession) {
-                Text(
-                    text = if (uiState.isSessionActive) {
-                        stringResource(R.string.stop_session)
-                    } else {
-                        stringResource(R.string.start_breathing)
-                    }
-                )
-            }
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(onClick = onToggleSession) {
+            Text(
+                text = if (uiState.isSessionActive) {
+                    stringResource(R.string.stop_session)
+                } else {
+                    stringResource(R.string.start_breathing)
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }

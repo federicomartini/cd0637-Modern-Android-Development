@@ -1,7 +1,6 @@
 package com.udacity.zenflow.ui.journal
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,67 +47,64 @@ fun JournalScreenContent(
 ) {
     var entryText by remember { mutableStateOf("") }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = stringResource(R.string.gratitude_journal),
-            style = MaterialTheme.typography.headlineSmall
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = entryText,
-            onValueChange = { entryText = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("journal_input"),
-            placeholder = { Text(text = stringResource(R.string.i_am_grateful_for)) },
-            singleLine = false,
-            minLines = 2
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Button(
-            onClick = {
-                onAddEntry(entryText)
-                entryText = ""
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = stringResource(R.string.save))
+        item {
+            Text(
+                text = stringResource(R.string.gratitude_journal),
+                style = MaterialTheme.typography.headlineSmall
+            )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        item {
+            OutlinedTextField(
+                value = entryText,
+                onValueChange = { entryText = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("journal_input"),
+                placeholder = { Text(text = stringResource(R.string.i_am_grateful_for)) },
+                singleLine = false,
+                minLines = 2
+            )
+        }
 
-        Text(
-            text = stringResource(R.string.your_entries),
-            style = MaterialTheme.typography.titleMedium
-        )
+        item {
+            Button(
+                onClick = {
+                    onAddEntry(entryText)
+                    entryText = ""
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = stringResource(R.string.save))
+            }
+        }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.your_entries),
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(entries, key = { it.id }) { entry ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Text(
-                        text = entry.content,
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
+        items(entries, key = { it.id }) { entry ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    text = entry.content,
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
     }
